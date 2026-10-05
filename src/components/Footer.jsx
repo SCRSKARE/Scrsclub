@@ -1,139 +1,264 @@
 import React from 'react';
-import { Sparkles, MessageSquare, Mail, MapPin, Globe, Share2 } from 'lucide-react';
+import {
+  Sparkles,
+  Mail,
+  MapPin,
+  Phone,
+  Globe,
+  Share2,
+  MessageSquare,
+  Lock,
+  Shield,
+  Calendar,
+  Users
+} from 'lucide-react';
 
 export default function Footer({ onNavigate }) {
   return (
-    <footer className="footer">
+    <footer className="footer" style={{ borderTop: '1px solid var(--border-subtle)', background: 'rgba(8, 12, 21, 0.95)', padding: '4rem 0 2rem 0' }}>
       <div className="container">
-        <div className="footer-grid">
-          {/* Brand Info */}
+        <div
+          className="footer-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '2.5rem',
+            marginBottom: '3rem'
+          }}
+        >
+          {/* Brand Column */}
           <div>
-            <div className="nav-brand" style={{ marginBottom: '1rem', cursor: 'pointer' }} onClick={() => onNavigate('home')}>
-              <div className="brand-logo-icon">
-                <Sparkles size={20} color="#ffffff" />
+            <div
+              className="nav-brand"
+              style={{ marginBottom: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+              onClick={() => onNavigate('home')}
+            >
+              <div
+                className="brand-logo-icon"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Sparkles size={18} color="#ffffff" />
               </div>
               <div>
-                <span>SCRS</span>
-                <span className="brand-badge" style={{ marginLeft: '4px' }}>HIRING</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>SCRS</span>
+                <span style={{ fontSize: '0.65rem', marginLeft: '6px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', fontWeight: 700 }}>
+                  OFFICIAL
+                </span>
               </div>
             </div>
 
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '320px', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-              Student Community & Research Society. Empowering student innovators, engineers, creators, and organizers to build campus-defining experiences.
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+              Student Community & Research Society at KL University. Bridging academic research, bleeding-edge engineering, and high-octane hackathons.
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <a
                 href="https://github.com"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-secondary btn-sm"
-                style={{ width: '36px', height: '36px', padding: 0 }}
+                style={{ width: '34px', height: '34px', padding: 0 }}
                 aria-label="GitHub Community"
               >
-                <Globe size={16} />
+                <Globe size={15} />
               </a>
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-secondary btn-sm"
-                style={{ width: '36px', height: '36px', padding: 0 }}
+                style={{ width: '34px', height: '34px', padding: 0 }}
                 aria-label="LinkedIn"
               >
-                <Share2 size={16} />
+                <Share2 size={15} />
               </a>
               <a
                 href="https://discord.com"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-secondary btn-sm"
-                style={{ width: '36px', height: '36px', padding: 0 }}
-                aria-label="Discord Server"
+                style={{ width: '34px', height: '34px', padding: 0 }}
+                aria-label="Discord"
               >
-                <MessageSquare size={16} />
+                <MessageSquare size={15} />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Navigation Links */}
           <div>
-            <h4 className="footer-col-title">Quick Links</h4>
-            <ul className="footer-links-list">
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Official Website
+            </h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <li>
-                <button onClick={() => onNavigate('home')} style={{ color: 'inherit' }}>
-                  Overview & Tracks
+                <button
+                  onClick={() => onNavigate('home')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Home
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => {
-                    onNavigate('home');
-                    setTimeout(() => {
-                      document.getElementById('roles-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 50);
-                  }}
-                  style={{ color: 'inherit' }}
+                  onClick={() => onNavigate('about')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
                 >
-                  Wings & Roles
+                  About the Club
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('apply')} style={{ color: 'inherit' }}>
-                  Apply Online
+                <button
+                  onClick={() => onNavigate('past-events')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Past Events & Gallery
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('tracker')} style={{ color: 'inherit' }}>
-                  Track Application
+                <button
+                  onClick={() => onNavigate('upcoming-events')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Upcoming Events
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('admin')} style={{ color: 'inherit' }}>
-                  Coordinator Portal
+                <button
+                  onClick={() => onNavigate('team')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Our Team & Leadership
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('contact')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Contact & Inquiries
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Wings */}
+          {/* Hiring / Recruitment Portal */}
           <div>
-            <h4 className="footer-col-title">Wings</h4>
-            <ul className="footer-links-list">
-              <li>Technical & Web Dev</li>
-              <li>Creative Design & Media</li>
-              <li>Events & Operations</li>
-              <li>Public Relations & Outreach</li>
-              <li>Corporate & Sponsorship</li>
-              <li>Content & Editorial</li>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#34d399', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Hiring / Join Us
+            </h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <li>
+                <button
+                  onClick={() => onNavigate('hiring')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Recruitment Overview
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('hiring')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Wings & Roles Directory
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('hiring')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Submit Application
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('hiring')}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
+                >
+                  Track Application Status
+                </button>
+              </li>
+              <li style={{ marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => onNavigate('admin')}
+                  style={{
+                    background: 'rgba(99, 102, 241, 0.1)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    color: '#a5b4fc',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Lock size={12} />
+                  <span>Admin CMS Dashboard</span>
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Location & Contact */}
           <div>
-            <h4 className="footer-col-title">Recruitment Desk</h4>
-            <ul className="footer-links-list">
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <MapPin size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span>Student Activity Center, Room 304</span>
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Mail size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
-                <span>recruitment@scrs-club.org</span>
-              </li>
-            </ul>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Campus Headquarters
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                <MapPin size={16} color="#06b6d4" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>Room 304, Student Activity Center (SAC), KL University, Vaddeswaram, AP 522502</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Mail size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+                <span>scrs@klu.ac.in</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Phone size={16} color="#10b981" style={{ flexShrink: 0 }} />
+                <span>+91 98765 43210</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Footer Bottom */}
-        <div className="footer-bottom">
+        {/* Bottom Bar */}
+        <div
+          style={{
+            paddingTop: '2rem',
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            fontSize: '0.825rem',
+            color: 'var(--text-dim)'
+          }}
+        >
           <div>
-            © {new Date().getFullYear()} SCRS Student Community & Research Society. All rights reserved.
+            © {new Date().getFullYear()} SCRS (Student Community & Research Society). Official Student Chapter at KL University. All rights reserved.
           </div>
-          <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <span>Annual Recruitment Drive 2026-27</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <span>Designed for Innovation</span>
             <span>•</span>
-            <span>Powered by Firebase & Modern Web</span>
+            <button
+              onClick={() => onNavigate('admin')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, fontSize: '0.825rem' }}
+            >
+              Coordinator Admin Panel
+            </button>
           </div>
         </div>
       </div>
