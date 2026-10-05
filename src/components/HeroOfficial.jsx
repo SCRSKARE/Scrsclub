@@ -101,24 +101,6 @@ export default function HeroOfficial({ homepageData, onNavigate }) {
 
           <button
             className="btn btn-secondary btn-lg"
-            onClick={() => onNavigate('hiring')}
-            style={{
-              fontSize: '1rem',
-              padding: '0.85rem 1.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              borderColor: 'rgba(99, 102, 241, 0.4)',
-              background: 'rgba(99, 102, 241, 0.12)',
-              color: '#a5b4fc'
-            }}
-          >
-            <Shield size={18} />
-            <span>Join / Hiring</span>
-          </button>
-
-          <button
-            className="btn btn-secondary btn-lg"
             onClick={() => onNavigate('about')}
             style={{ fontSize: '1rem', padding: '0.85rem 1.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >

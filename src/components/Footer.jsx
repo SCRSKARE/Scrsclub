@@ -153,7 +153,7 @@ export default function Footer({ onNavigate }) {
           {/* Hiring / Recruitment Portal */}
           <div>
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#34d399', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Hiring / Join Us
+              Hiring Portal
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <li>
@@ -186,26 +186,6 @@ export default function Footer({ onNavigate }) {
                   style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
                 >
                   Track Application Status
-                </button>
-              </li>
-              <li style={{ marginTop: '0.5rem' }}>
-                <button
-                  onClick={() => onNavigate('admin')}
-                  style={{
-                    background: 'rgba(99, 102, 241, 0.1)',
-                    border: '1px solid rgba(99, 102, 241, 0.3)',
-                    color: '#a5b4fc',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <Lock size={12} />
-                  <span>Admin CMS Dashboard</span>
                 </button>
               </li>
             </ul>
@@ -251,14 +231,7 @@ export default function Footer({ onNavigate }) {
             © {new Date().getFullYear()} SCRS (Student Community & Research Society). Official Student Chapter at KL University. All rights reserved.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <span>Designed for Innovation</span>
-            <span>•</span>
-            <button
-              onClick={() => onNavigate('admin')}
-              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, fontSize: '0.825rem' }}
-            >
-              Coordinator Admin Panel
-            </button>
+            <span>Designed for Innovation & Research</span>
           </div>
         </div>
       </div>
