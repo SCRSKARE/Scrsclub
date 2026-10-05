@@ -13,6 +13,8 @@ import {
   Users
 } from 'lucide-react';
 
+import clubLogo from '../assets/logo.jpeg';
+
 export default function Footer({ onNavigate }) {
   return (
     <footer className="footer" style={{ borderTop: '1px solid var(--border-subtle)', background: 'rgba(8, 12, 21, 0.95)', padding: '4rem 0 2rem 0' }}>
@@ -36,27 +38,34 @@ export default function Footer({ onNavigate }) {
               <div
                 className="brand-logo-icon"
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  background: '#ffffff',
+                  border: '2px solid rgba(56, 189, 248, 0.5)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}
               >
-                <Sparkles size={18} color="#ffffff" />
+                <img
+                  src={clubLogo}
+                  alt="SCRS Logo"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
               </div>
               <div>
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>SCRS</span>
-                <span style={{ fontSize: '0.65rem', marginLeft: '6px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', fontWeight: 700 }}>
-                  OFFICIAL
+                <span style={{ fontSize: '0.65rem', marginLeft: '6px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.18)', color: '#38bdf8', fontWeight: 700 }}>
+                  STUDENT CHAPTER
                 </span>
               </div>
             </div>
 
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-              Student Community & Research Society at KL University. Bridging academic research, bleeding-edge engineering, and high-octane hackathons.
+              Soft Computing Research Society. Bridging academic research, theoretical algorithms, bleeding-edge engineering, and high-octane hackathons.
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>

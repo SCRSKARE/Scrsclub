@@ -8,6 +8,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
+import clubLogo from '../assets/logo.jpeg';
+
 export default function Navbar({
   activeTab,
   setActiveTab,
@@ -29,9 +31,23 @@ export default function Navbar({
     <nav className="navbar">
       <div className="container nav-inner">
         {/* Brand */}
-        <div className="nav-brand" onClick={() => setActiveTab('home')} style={{ cursor: 'pointer' }}>
-          <div className="brand-logo-icon">
-            <Sparkles size={20} color="#ffffff" />
+        <div className="nav-brand" onClick={() => setActiveTab('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div
+            className="brand-logo-icon"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              background: '#ffffff',
+              border: '2px solid rgba(56, 189, 248, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <img src={clubLogo} alt="SCRS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div>
             <span>SCRS</span>

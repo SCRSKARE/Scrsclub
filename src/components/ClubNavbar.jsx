@@ -17,6 +17,8 @@ import {
   Lock
 } from 'lucide-react';
 
+import clubLogo from '../assets/logo.jpeg';
+
 export default function ClubNavbar({
   activeTab,
   setActiveTab,
@@ -55,17 +57,24 @@ export default function ClubNavbar({
           <div
             className="brand-logo-icon"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '2px solid rgba(56, 189, 248, 0.6)',
+              boxShadow: '0 0 16px rgba(56, 189, 248, 0.35)',
+              background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)'
+              flexShrink: 0
             }}
           >
-            <Sparkles size={20} color="#ffffff" />
+            <img
+              src={clubLogo}
+              alt="SCRS Official Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -78,16 +87,16 @@ export default function ClubNavbar({
                   fontWeight: 700,
                   padding: '2px 6px',
                   borderRadius: '4px',
-                  background: 'rgba(99, 102, 241, 0.2)',
-                  color: '#a5b4fc',
-                  border: '1px solid rgba(99, 102, 241, 0.4)'
+                  background: 'rgba(56, 189, 248, 0.18)',
+                  color: '#38bdf8',
+                  border: '1px solid rgba(56, 189, 248, 0.35)'
                 }}
               >
-                KLU CHAPTER
+                STUDENT CHAPTER
               </span>
             </div>
             <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: '0.02em', fontWeight: 600 }}>
-              Student Community & Research Society
+              Soft Computing Research Society
             </span>
           </div>
         </div>
