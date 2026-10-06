@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import HiringTracks from './components/HiringTracks';
-import DomainsDirectory from './components/DomainsDirectory';
-import TimelineAndFaq from './components/TimelineAndFaq';
-import ApplicationForm from './components/ApplicationForm';
+import ClubHome from './components/ClubHome';
+import RoleHiringPage from './components/RoleHiringPage';
+import EventsSection from './components/EventsSection';
+import TeamSection from './components/TeamSection';
 import StatusTracker from './components/StatusTracker';
 import AdminPortal from './components/AdminPortal';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
 import { initFirebase } from './services/firebase';
+import { purgeLegacySampleData } from './services/db';
 import { getCurrentUser, subscribeToAuth, signOutParticipant } from './services/auth';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'apply' | 'tracker' | 'admin'
-  const [selectedDomain, setSelectedDomain] = useState('');
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'events' | 'team' | 'apply' | 'tracker' | 'admin'
   const [trackerQuery, setTrackerQuery] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
+  const [selectedDomainForApply, setSelectedDomainForApply] = useState('');
+  const [openFormForApply, setOpenFormForApply] = useState(false);
 
   useEffect(() => {
+    purgeLegacySampleData();
     initFirebase();
     const unsub = subscribeToAuth((user) => {
       setCurrentUser(user);
@@ -27,32 +29,63 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  const handleApplyClick = (domain = '') => {
-    if (domain) setSelectedDomain(domain);
-    setActiveTab('apply');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleNavigate = (tab, options = {}) => {
+    let targetId = null;
+    let domain = '';
+    let openForm = false;
+
+    if (typeof options === 'string') {
+      targetId = options;
+    } else if (options && typeof options === 'object') {
+      targetId = options.targetId || null;
+      domain = options.domain || '';
+      openForm = Boolean(options.openForm);
+    }
+
+    if (domain) {
+      setSelectedDomainForApply(domain);
+      setOpenFormForApply(true);
+    } else if (openForm) {
+      setOpenFormForApply(true);
+    } else if (tab === 'apply') {
+      setSelectedDomainForApply('');
+      setOpenFormForApply(false);
+    }
+
+    setActiveTab(tab);
+
+    if (targetId) {
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 120);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleTrackClick = (refId = '') => {
     if (refId) setTrackerQuery(refId);
-    setActiveTab('tracker');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('tracker');
   };
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     if (user.role === 'admin') {
-      setActiveTab('admin');
+      handleNavigate('admin');
     } else {
-      setActiveTab('tracker');
+      handleNavigate('tracker');
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSignOut = async () => {
     await signOutParticipant();
     setCurrentUser(null);
-    setActiveTab('home');
+    handleNavigate('home');
   };
 
   return (
@@ -60,7 +93,7 @@ export default function App() {
       {/* Sticky Navigation */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleNavigate}
         currentUser={currentUser}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
         onSignOut={handleSignOut}
@@ -68,31 +101,28 @@ export default function App() {
 
       <main>
         {activeTab === 'home' && (
-          <>
-            {/* Hero Section */}
-            <Hero
-              onApplyClick={() => handleApplyClick()}
-              onTrackClick={() => handleTrackClick()}
-            />
+          <ClubHome
+            onNavigate={handleNavigate}
+          />
+        )}
 
-            {/* Coordinator Leadership Overview */}
-            <HiringTracks
-              onApplyClick={() => handleApplyClick()}
-            />
+        {activeTab === 'events' && (
+          <EventsSection
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            onNavigateToTracker={() => handleNavigate('tracker')}
+          />
+        )}
 
-            {/* Wings & Role Directory */}
-            <DomainsDirectory
-              onSelectDomainForApply={(domTitle) => handleApplyClick(domTitle)}
-            />
-
-            {/* Timeline & FAQs */}
-            <TimelineAndFaq />
-          </>
+        {activeTab === 'team' && (
+          <TeamSection
+            onNavigateToApply={() => handleNavigate('apply')}
+          />
         )}
 
         {activeTab === 'apply' && (
-          <ApplicationForm
-            initialDomain={selectedDomain}
+          <RoleHiringPage
+            initialDomain={selectedDomainForApply}
+            openFormDirectly={openFormForApply}
             onNavigateToTracker={(refId) => handleTrackClick(refId)}
           />
         )}
@@ -100,9 +130,9 @@ export default function App() {
         {activeTab === 'tracker' && (
           <StatusTracker
             initialQuery={trackerQuery}
-            onNavigateToApply={() => handleApplyClick()}
+            onNavigateToApply={() => handleNavigate('apply')}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
-            onNavigateToAdmin={() => setActiveTab('admin')}
+            onNavigateToAdmin={() => handleNavigate('admin')}
           />
         )}
 
@@ -113,7 +143,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Unified Login Modal with Auto-Routing */}
+      {/* Unified Login Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -121,7 +151,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      <Footer onNavigate={setActiveTab} />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 }

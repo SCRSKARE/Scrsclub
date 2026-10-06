@@ -64,7 +64,7 @@ export default function Hero({ onApplyClick, onTrackClick }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.6rem',
-          background: 'rgba(255, 255, 255, 0.04)',
+          background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
           padding: '0.5rem 1.25rem',
           borderRadius: 'var(--radius-full)',
@@ -72,9 +72,9 @@ export default function Hero({ onApplyClick, onTrackClick }) {
           fontSize: '0.88rem',
           color: 'var(--text-muted)'
         }}>
-          <Clock size={15} color="#38bdf8" />
+          <Clock size={15} color="var(--primary)" />
           <span>Application Window Closes In:</span>
-          <strong style={{ color: '#f8fafc', letterSpacing: '0.04em' }}>
+          <strong style={{ color: 'var(--text-main)', letterSpacing: '0.04em' }}>
             {timeLeft.days}d : {String(timeLeft.hours).padStart(2, '0')}h : {String(timeLeft.minutes).padStart(2, '0')}m : {String(timeLeft.seconds).padStart(2, '0')}s
           </strong>
         </div>

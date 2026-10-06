@@ -22,6 +22,7 @@ import {
 import { DOMAINS } from '../data/rolesData';
 import { submitApplication } from '../services/db';
 import { getCurrentUser, isKluEmail } from '../services/auth';
+import PhotoInput from './PhotoInput';
 
 export default function ApplicationForm({ initialDomain = '', onNavigateToTracker }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -42,6 +43,7 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
     rollNumber: '',
     branch: '',
     year: '2nd Year',
+    photoUrl: loggedInUser?.photoURL || '',
 
     // Step 2: Role & Wing
     role: initialDomain || DOMAINS[0].title,
@@ -66,11 +68,12 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
   }, [initialDomain]);
 
   useEffect(() => {
-    if (loggedInUser && loggedInUser.email && !formData.email) {
+    if (loggedInUser) {
       setFormData(prev => ({
         ...prev,
-        email: loggedInUser.email,
-        fullName: prev.fullName || loggedInUser.displayName || ''
+        email: prev.email || loggedInUser.email || '',
+        fullName: prev.fullName || loggedInUser.displayName || '',
+        photoUrl: prev.photoUrl || loggedInUser.photoURL || ''
       }));
     }
   }, [loggedInUser]);
@@ -95,10 +98,6 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
     } else if (step === 2) {
       if (!formData.role) return 'Please select your target role.';
       if (!formData.skills.trim()) return 'Please mention a few skills or tools you are familiar with.';
-    } else if (step === 4) {
-      if (!formData.whyJoin.trim() || formData.whyJoin.length < 20) {
-        return 'Please write at least a couple of sentences on why you want to take up this coordinator role.';
-      }
     }
     return '';
   };
@@ -120,7 +119,7 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const err = validateStep(4);
+    const err = validateStep(2);
     if (err) {
       setErrorMessage(err);
       return;
@@ -267,7 +266,7 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
           <span className="section-eyebrow">Recruitment Application</span>
           <h2 className="section-title">Apply for Coordinator Role</h2>
           <p className="section-description">
-            Complete the 4 steps below. Please use your official university email (<code>@klu.ac.in</code>) so you can log in to check your interview calls and application status.
+            Complete the 2 steps below. Please use your official university email (<code>@klu.ac.in</code>) so you can log in to check your interview calls and application status.
           </p>
         </div>
 
@@ -276,9 +275,7 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
           <div className="stepper-nav">
             {[
               { num: 1, label: 'Profile' },
-              { num: 2, label: 'Role Selection' },
-              { num: 3, label: 'Experience' },
-              { num: 4, label: 'Vision' }
+              { num: 2, label: 'Role Selection' }
             ].map(step => (
               <div
                 key={step.num}
@@ -343,8 +340,8 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                   </div>
 
                   <div className="form-group col-span-2">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <label className="form-label" htmlFor="email">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.25rem' }}>
+                      <label className="form-label" htmlFor="email" style={{ marginBottom: 0 }}>
                         KLU Institutional Email <span className="req">*</span>
                       </label>
                       <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600 }}>
@@ -361,9 +358,6 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                       onChange={handleChange}
                       required
                     />
-                    <span className="form-hint">
-                      This email will be used for your Firebase participant login to check live status and interview slots.
-                    </span>
                   </div>
 
                   <div className="form-group">
@@ -399,6 +393,22 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                   </div>
 
                   <div className="form-group">
+                    <label className="form-label" htmlFor="branch">
+                      Branch / Department <span className="req">*</span>
+                    </label>
+                    <input
+                      id="branch"
+                      name="branch"
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Computer Science, AI & DS, ECE, Mechanical..."
+                      value={formData.branch}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label className="form-label" htmlFor="year">
                       Year of Study <span className="req">*</span>
                     </label>
@@ -409,27 +419,20 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                       value={formData.year}
                       onChange={handleChange}
                     >
-                      <option value="1st Year">1st Year (Freshers)</option>
-                      <option value="2nd Year">2nd Year (Sophomores)</option>
-                      <option value="3rd Year">3rd Year (Pre-final)</option>
-                      <option value="4th Year">4th Year (Final Year)</option>
-                      <option value="Postgraduate">Postgraduate / Masters</option>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
                     </select>
                   </div>
 
-                  <div className="form-group col-span-2">
-                    <label className="form-label" htmlFor="branch">
-                      Branch / Department <span className="req">*</span>
-                    </label>
-                    <input
-                      id="branch"
-                      name="branch"
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Computer Science, AI & DS, ECE, Mechanical, Biotechnology..."
-                      value={formData.branch}
-                      onChange={handleChange}
-                      required
+                  <div className="col-span-2" style={{ marginTop: '0.5rem' }}>
+                    <PhotoInput
+                      value={formData.photoUrl}
+                      onChange={(url) => setFormData(prev => ({ ...prev, photoUrl: url }))}
+                      label="Applicant Profile Photo (Optional)"
+                      placeholder="https://example.com/profile-photo.jpg"
+                      shape="circle"
+                      helpText=""
                     />
                   </div>
                 </div>
@@ -464,10 +467,52 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                       </option>
                     ))}
                   </select>
-                  <span className="form-hint">
-                    Choose the primary wing where you want to lead initiatives and projects.
-                  </span>
                 </div>
+
+                {/* Selected Domain Preview Card */}
+                {(() => {
+                  const activeDomain = DOMAINS.find(d => d.title === formData.role) || DOMAINS[0];
+                  return (
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.7)',
+                      border: '1px solid var(--border-light)',
+                      borderLeft: `4px solid ${activeDomain.color || '#38bdf8'}`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: '1.25rem',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 800, color: activeDomain.color || '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {activeDomain.wing} Overview
+                      </div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 700, marginBlock: '0.35rem 0.5rem', color: 'var(--text-main)' }}>
+                        {activeDomain.tagline}
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                        {activeDomain.description}
+                      </p>
+                      {activeDomain.responsibilities && (
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                          <strong style={{ color: 'var(--text-dim)', display: 'block', marginBottom: '0.35rem' }}>Key Responsibilities:</strong>
+                          <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            {activeDomain.responsibilities.map((r, i) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {activeDomain.recommendedSkills && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 700 }}>Recommended:</span>
+                          {activeDomain.recommendedSkills.map((s, i) => (
+                            <span key={i} style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Secondary Role */}
                 <div className="form-group">
@@ -488,9 +533,6 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                       </option>
                     ))}
                   </select>
-                  <span className="form-hint">
-                    Helpful if your skills span multiple areas (e.g. Tech + Design or Events + PR).
-                  </span>
                 </div>
 
                 {/* Skills */}
@@ -508,129 +550,6 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                     onChange={handleChange}
                     required
                   />
-                  <span className="form-hint">
-                    Separate skills with commas.
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Experience & Portfolios */}
-            {currentStep === 3 && (
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                  Portfolio, Profiles & Past Experience
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
-                  Showcase your work. A working portfolio, GitHub repo, or Behance profile helps us evaluate your practical abilities.
-                </p>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="portfolioUrl">
-                    GitHub / Portfolio / Behance / Google Drive Work Link
-                  </label>
-                  <input
-                    id="portfolioUrl"
-                    name="portfolioUrl"
-                    type="url"
-                    className="form-input"
-                    placeholder="https://github.com/your-username or https://behance.net/..."
-                    value={formData.portfolioUrl}
-                    onChange={handleChange}
-                  />
-                  <span className="form-hint">
-                    For Tech & Creative Design roles, sharing your work is highly recommended.
-                  </span>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="linkedinUrl">
-                    LinkedIn Profile URL (Optional)
-                  </label>
-                  <input
-                    id="linkedinUrl"
-                    name="linkedinUrl"
-                    type="url"
-                    className="form-input"
-                    placeholder="https://linkedin.com/in/your-profile"
-                    value={formData.linkedinUrl}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="experience">
-                    Prior Club, Project, or Event Leadership Experience (Optional)
-                  </label>
-                  <textarea
-                    id="experience"
-                    name="experience"
-                    className="form-textarea"
-                    rows={4}
-                    placeholder="Tell us about any projects you've created, teams you've led, hackathons you've participated in, or school/college clubs you were active in..."
-                    value={formData.experience}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* STEP 4: Motivation & Vision */}
-            {currentStep === 4 && (
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                  Vision, Motivation & Time Commitment
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>
-                  Help us understand your enthusiasm and how you envision leading your chosen wing.
-                </p>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="whyJoin">
-                    Why do you want to become a Coordinator for SCRS? <span className="req">*</span>
-                  </label>
-                  <textarea
-                    id="whyJoin"
-                    name="whyJoin"
-                    className="form-textarea"
-                    rows={3}
-                    placeholder="What excites you about leading this domain? What impact do you hope to make during your tenure?"
-                    value={formData.whyJoin}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="initiativeIdea">
-                    One project, workshop, or event you would like to initiate:
-                  </label>
-                  <textarea
-                    id="initiativeIdea"
-                    name="initiativeIdea"
-                    className="form-textarea"
-                    rows={3}
-                    placeholder="e.g. A beginner AI boot-camp, a campus UI redesign sprint, an alumni speaker session, or an inter-college hackathon..."
-                    value={formData.initiativeIdea}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="weeklyHours">
-                    Expected Weekly Commitment <span className="req">*</span>
-                  </label>
-                  <select
-                    id="weeklyHours"
-                    name="weeklyHours"
-                    className="form-select"
-                    value={formData.weeklyHours}
-                    onChange={handleChange}
-                  >
-                    <option value="6-8 hours/week">6 - 8 hours / week</option>
-                    <option value="8-12 hours/week">8 - 12 hours / week (Standard Coordinator)</option>
-                    <option value="12-16 hours/week">12 - 16 hours / week (Dedicated Lead)</option>
-                  </select>
                 </div>
               </div>
             )}
@@ -655,7 +574,7 @@ export default function ApplicationForm({ initialDomain = '', onNavigateToTracke
                 </button>
               ) : <div />}
 
-              {currentStep < 4 ? (
+              {currentStep < 2 ? (
                 <button
                   type="button"
                   className="btn btn-primary"

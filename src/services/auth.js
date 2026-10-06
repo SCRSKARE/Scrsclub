@@ -1,5 +1,10 @@
 import {
   getFirebaseAuth,
+  getDb,
+  doc,
+  setDoc,
+  onSnapshot,
+  COLLECTIONS,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
@@ -8,8 +13,12 @@ import {
 
 const SESSION_KEY = 'scrs_klu_auth_user_v2';
 
-// Designated Admin / Core Coordinator emails
-export const ADMIN_EMAILS = [
+const STORAGE_KEY_ADMIN_LIST = 'scrs_admin_emails_v2';
+const STORAGE_KEY_ADMIN_PASSCODE = 'scrs_admin_passcode_v2';
+const STORAGE_KEY_SETTINGS = 'scrs_portal_settings_v2';
+
+export const DEFAULT_ADMIN_EMAILS = [
+  '99230041018@klu.ac.in',
   'admin@klu.ac.in',
   'scrs.admin@klu.ac.in',
   'scrs.lead@klu.ac.in',
@@ -17,6 +26,106 @@ export const ADMIN_EMAILS = [
   'president@klu.ac.in',
   'faculty@klu.ac.in'
 ];
+
+export function getAdminEmails() {
+  const stored = localStorage.getItem(STORAGE_KEY_ADMIN_LIST);
+  if (!stored) {
+    localStorage.setItem(STORAGE_KEY_ADMIN_LIST, JSON.stringify(DEFAULT_ADMIN_EMAILS));
+    return DEFAULT_ADMIN_EMAILS;
+  }
+  try { return JSON.parse(stored); } catch { return DEFAULT_ADMIN_EMAILS; }
+}
+
+export function saveAdminEmails(emails) {
+  localStorage.setItem(STORAGE_KEY_ADMIN_LIST, JSON.stringify(emails));
+
+  const db = getDb();
+  if (db) {
+    setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'admins'), { emails })
+      .catch(err => console.warn('Firestore saveAdminEmails notice:', err));
+  }
+}
+
+export function addAdminEmail(email) {
+  const clean = email.trim().toLowerCase();
+  const current = getAdminEmails();
+  if (!current.includes(clean)) {
+    const updated = [...current, clean];
+    saveAdminEmails(updated);
+    return updated;
+  }
+  return current;
+}
+
+export function removeAdminEmail(email) {
+  const clean = email.trim().toLowerCase();
+  const current = getAdminEmails();
+  const updated = current.filter(e => e !== clean);
+  saveAdminEmails(updated);
+  return updated;
+}
+
+export function getAdminPasscode() {
+  return localStorage.getItem(STORAGE_KEY_ADMIN_PASSCODE) || 'scrs2026';
+}
+
+export function saveAdminPasscode(newPin) {
+  localStorage.setItem(STORAGE_KEY_ADMIN_PASSCODE, newPin.trim());
+
+  const db = getDb();
+  if (db) {
+    setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'security'), { passcode: newPin.trim() })
+      .catch(err => console.warn('Firestore saveAdminPasscode notice:', err));
+  }
+}
+
+export function getPortalSettings() {
+  const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
+  const defaults = {
+    recruitmentOpen: true,
+    recruitmentYear: '2026-27',
+    allowMultipleApplications: false,
+    announcementMessage: 'Annual Coordinator Recruitment 2026-27 is LIVE',
+    passcodeRequired: true
+  };
+  if (!stored) return defaults;
+  try { return { ...defaults, ...JSON.parse(stored) }; } catch { return defaults; }
+}
+
+export function savePortalSettings(settings) {
+  localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+
+  const db = getDb();
+  if (db) {
+    setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'recruitment'), settings)
+      .catch(err => console.warn('Firestore savePortalSettings notice:', err));
+  }
+}
+
+export function subscribeToPortalSettings(callback) {
+  const db = getDb();
+  if (db) {
+    try {
+      const docRef = doc(db, COLLECTIONS.PORTAL_SETTINGS, 'recruitment');
+      return onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const settings = docSnap.data();
+          localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+          callback(settings);
+        } else {
+          callback(getPortalSettings());
+        }
+      }, (error) => {
+        console.warn('subscribeToPortalSettings notice:', error);
+        callback(getPortalSettings());
+      });
+    } catch (e) {
+      console.warn('Failed to attach portal settings listener:', e);
+    }
+  }
+  callback(getPortalSettings());
+  return () => {};
+}
 
 export function isKluEmail(email) {
   if (!email || typeof email !== 'string') return false;
@@ -26,7 +135,8 @@ export function isKluEmail(email) {
 export function isAdminEmail(email) {
   if (!email) return false;
   const clean = email.trim().toLowerCase();
-  return ADMIN_EMAILS.includes(clean) || clean.startsWith('admin');
+  const list = getAdminEmails();
+  return list.includes(clean) || clean.startsWith('admin');
 }
 
 export function getUserRole(email) {
@@ -115,7 +225,7 @@ export async function signInWithGoogleKlu() {
 
   if (!auth) {
     throw new Error(
-      'Firebase Auth is not initialized. Please verify your credentials in src/services/firebase.js.'
+      'Firebase Auth is not initialized. Please verify your credentials in .env.'
     );
   }
 

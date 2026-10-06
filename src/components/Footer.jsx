@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, MessageSquare, Mail, MapPin, Globe, Share2 } from 'lucide-react';
+import clubLogo from '../assets/logo.jpg';
 
 export default function Footer({ onNavigate }) {
   return (
@@ -9,8 +10,8 @@ export default function Footer({ onNavigate }) {
           {/* Brand Info */}
           <div>
             <div className="nav-brand" style={{ marginBottom: '1rem', cursor: 'pointer' }} onClick={() => onNavigate('home')}>
-              <div className="brand-logo-icon">
-                <Sparkles size={20} color="#ffffff" />
+              <div className="brand-logo-icon" style={{ padding: 0, overflow: 'hidden', borderRadius: '50%', background: '#fff' }}>
+                <img src={clubLogo} alt="SCRS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div>
                 <span>SCRS</span>
@@ -61,65 +62,117 @@ export default function Footer({ onNavigate }) {
             <h4 className="footer-col-title">Quick Links</h4>
             <ul className="footer-links-list">
               <li>
-                <button onClick={() => onNavigate('home')} style={{ color: 'inherit' }}>
-                  Overview & Tracks
+                <button type="button" onClick={() => onNavigate('home')}>
+                  Home & Overview
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => onNavigate('events')}>
+                  Campus Events & Winners
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => onNavigate('team')}>
+                  Team Leadership & Faculty
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => {
-                    onNavigate('home');
-                    setTimeout(() => {
-                      document.getElementById('roles-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 50);
-                  }}
-                  style={{ color: 'inherit' }}
+                  type="button"
+                  onClick={() => onNavigate('apply', { targetId: 'roles-section' })}
                 >
-                  Wings & Roles
+                  Wings & Open Roles
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('apply')} style={{ color: 'inherit' }}>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { openForm: true })}
+                >
                   Apply Online
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('tracker')} style={{ color: 'inherit' }}>
-                  Track Application
+                <button type="button" onClick={() => onNavigate('tracker')}>
+                  Track Application Status
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('admin')} style={{ color: 'inherit' }}>
+                <button type="button" onClick={() => onNavigate('admin')}>
                   Coordinator Portal
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Wings */}
+          {/* Wings & Role Specializations */}
           <div>
-            <h4 className="footer-col-title">Wings</h4>
+            <h4 className="footer-col-title">Wings & Roles</h4>
             <ul className="footer-links-list">
-              <li>Technical & Web Dev</li>
-              <li>Creative Design & Media</li>
-              <li>Events & Operations</li>
-              <li>Public Relations & Outreach</li>
-              <li>Corporate & Sponsorship</li>
-              <li>Content & Editorial</li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Technical & Web Dev Coordinator' })}
+                >
+                  Technical & Web Dev
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Creative Design & Media Coordinator' })}
+                >
+                  Creative Design & Media
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Events & Operations Coordinator' })}
+                >
+                  Events & Operations
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Public Relations & Outreach Coordinator' })}
+                >
+                  Public Relations & Outreach
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Corporate & Sponsorship Coordinator' })}
+                >
+                  Corporate & Sponsorship
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('apply', { domain: 'Content & Editorial Coordinator' })}
+                >
+                  Content & Editorial
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Desk */}
           <div>
             <h4 className="footer-col-title">Recruitment Desk</h4>
             <ul className="footer-links-list">
               <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
                 <MapPin size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span>Student Activity Center, Room 304</span>
+                <span>8401, 8th Block, Kalasalingam University</span>
               </li>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Mail size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
-                <span>recruitment@scrs-club.org</span>
+                <a href="mailto:Scrs@klu.ac.in" style={{ color: 'inherit' }}>
+                  Scrs@klu.ac.in
+                </a>
               </li>
             </ul>
           </div>
@@ -129,11 +182,6 @@ export default function Footer({ onNavigate }) {
         <div className="footer-bottom">
           <div>
             © {new Date().getFullYear()} SCRS Student Community & Research Society. All rights reserved.
-          </div>
-          <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <span>Annual Recruitment Drive 2026-27</span>
-            <span>•</span>
-            <span>Powered by Firebase & Modern Web</span>
           </div>
         </div>
       </div>
