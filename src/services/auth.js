@@ -298,6 +298,23 @@ export async function signInWithOrgEmailOnly(email) {
   return user;
 }
 
+// Sign in with coordinator passcode (admin)
+export async function signInWithPasscode(passcode) {
+  const clean = (passcode || '').trim();
+  if (clean === 'scrs2026' || clean === 'admin') {
+    const adminUser = {
+      uid: 'admin-passcode-user',
+      email: 'admin@klu.ac.in',
+      displayName: 'SCRS Administrator',
+      role: 'admin',
+      isPasscodeAuth: true
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(adminUser));
+    return adminUser;
+  }
+  throw new Error('Invalid passcode. Use "scrs2026" or "admin".');
+}
+
 // Sign out
 export async function signOutParticipant() {
   const auth = getFirebaseAuth();

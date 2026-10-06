@@ -13,7 +13,6 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import clubLogo from '../assets/logo.jpg';
 
 export default function Navbar({
   activeTab,
@@ -45,9 +44,9 @@ export default function Navbar({
     <nav className="navbar">
       <div className="container nav-inner">
         {/* Brand */}
-        <div className="nav-brand" onClick={() => navTo('home')} style={{ cursor: 'pointer' }}>
-          <div className="brand-logo-icon" style={{ padding: 0, overflow: 'hidden', borderRadius: '50%', background: 'transparent' }}>
-            <img src={clubLogo} alt="SCRS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+        <div className="nav-brand" onClick={() => setActiveTab('home')} style={{ cursor: 'pointer' }}>
+          <div className="brand-logo-icon">
+            <Sparkles size={20} color="#ffffff" />
           </div>
           <div>
             <span>SCRS</span>

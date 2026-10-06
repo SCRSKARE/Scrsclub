@@ -1,128 +1,145 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import ClubHome from './components/ClubHome';
-import RoleHiringPage from './components/RoleHiringPage';
-import EventsSection from './components/EventsSection';
-import TeamSection from './components/TeamSection';
+import Hero from './components/Hero';
+import HiringTracks from './components/HiringTracks';
+import DomainsDirectory from './components/DomainsDirectory';
+import TimelineAndFaq from './components/TimelineAndFaq';
+import ApplicationForm from './components/ApplicationForm';
 import StatusTracker from './components/StatusTracker';
 import AdminPortal from './components/AdminPortal';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
+
 import { initFirebase } from './services/firebase';
 import { purgeLegacySampleData } from './services/db';
 import { getCurrentUser, subscribeToAuth, signOutParticipant } from './services/auth';
+import { getClubCmsData, subscribeToClubData } from './services/clubCmsService';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'events' | 'team' | 'apply' | 'tracker' | 'admin'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'apply' | 'tracker' | 'admin'
+  const [selectedDomain, setSelectedDomain] = useState('');
   const [trackerQuery, setTrackerQuery] = useState('');
+
+  // Authentication
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [selectedDomainForApply, setSelectedDomainForApply] = useState('');
   const [openFormForApply, setOpenFormForApply] = useState(false);
 
+  // Club CMS Dynamic Data
+  const [cmsData, setCmsData] = useState(getClubCmsData());
+
+  // Sync with URL Hash on Mount & Window hashchange
   useEffect(() => {
     purgeLegacySampleData();
     initFirebase();
-    const unsub = subscribeToAuth((user) => {
+
+    const handleHashSync = () => {
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      if (!hash) return;
+
+      if (hash.startsWith('hiring-apply')) {
+        setActiveTab('hiring');
+        setHiringSubTab('apply');
+      } else if (hash.startsWith('hiring-tracker')) {
+        setActiveTab('hiring');
+        setHiringSubTab('tracker');
+      } else if (hash.startsWith('hiring-roles')) {
+        setActiveTab('hiring');
+        setHiringSubTab('roles');
+      } else if (['home', 'about', 'past-events', 'upcoming-events', 'team', 'hiring', 'contact', 'admin'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+
+    handleHashSync();
+    window.addEventListener('hashchange', handleHashSync);
+
+    // Auth subscription
+    const unsubAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
-    return () => unsub();
+
+    // Club CMS subscription
+    const unsubCms = subscribeToClubData((data) => {
+      setCmsData(data);
+    });
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashSync);
+      unsubAuth();
+      unsubCms();
+    };
   }, []);
 
-  const handleNavigate = (tab, options = {}) => {
-    let targetId = null;
-    let domain = '';
-    let openForm = false;
-
-    if (typeof options === 'string') {
-      targetId = options;
-    } else if (options && typeof options === 'object') {
-      targetId = options.targetId || null;
-      domain = options.domain || '';
-      openForm = Boolean(options.openForm);
-    }
-
-    if (domain) {
-      setSelectedDomainForApply(domain);
-      setOpenFormForApply(true);
-    } else if (openForm) {
-      setOpenFormForApply(true);
-    } else if (tab === 'apply') {
-      setSelectedDomainForApply('');
-      setOpenFormForApply(false);
-    }
-
-    setActiveTab(tab);
-
-    if (targetId) {
-      setTimeout(() => {
-        const el = document.getElementById(targetId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 120);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  const handleApplyClick = (domain = '') => {
+    if (domain) setSelectedDomain(domain);
+    setActiveTab('apply');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Direct trigger to Track Application
   const handleTrackClick = (refId = '') => {
     if (refId) setTrackerQuery(refId);
-    handleNavigate('tracker');
+    setActiveTab('tracker');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Login success routing
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     if (user.role === 'admin') {
-      handleNavigate('admin');
+      setActiveTab('admin');
     } else {
-      handleNavigate('tracker');
+      setActiveTab('tracker');
     }
   };
 
   const handleSignOut = async () => {
     await signOutParticipant();
     setCurrentUser(null);
-    handleNavigate('home');
+    setActiveTab('home');
   };
 
   return (
     <div className="app-root">
-      {/* Sticky Navigation */}
-      <Navbar
+      {/* Sticky Official Navbar */}
+      <ClubNavbar
         activeTab={activeTab}
-        setActiveTab={handleNavigate}
+        setActiveTab={setActiveTab}
         currentUser={currentUser}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
         onSignOut={handleSignOut}
       />
 
       <main>
+        {/* 1. HOME SECTION */}
         {activeTab === 'home' && (
-          <ClubHome
-            onNavigate={handleNavigate}
-          />
-        )}
+          <>
+            {/* Hero Section */}
+            <Hero
+              onApplyClick={() => handleApplyClick()}
+              onTrackClick={() => handleTrackClick()}
+            />
 
-        {activeTab === 'events' && (
-          <EventsSection
-            onOpenLoginModal={() => setIsLoginModalOpen(true)}
-            onNavigateToTracker={() => handleNavigate('tracker')}
-          />
-        )}
+            {/* Coordinator Leadership Overview */}
+            <HiringTracks
+              onApplyClick={() => handleApplyClick()}
+            />
 
-        {activeTab === 'team' && (
-          <TeamSection
-            onNavigateToApply={() => handleNavigate('apply')}
-          />
+            {/* Wings & Role Directory */}
+            <DomainsDirectory
+              onSelectDomainForApply={(domTitle) => handleApplyClick(domTitle)}
+            />
+
+            {/* Timeline & FAQs */}
+            <TimelineAndFaq />
+          </>
         )}
 
         {activeTab === 'apply' && (
-          <RoleHiringPage
-            initialDomain={selectedDomainForApply}
-            openFormDirectly={openFormForApply}
+          <ApplicationForm
+            initialDomain={selectedDomain}
             onNavigateToTracker={(refId) => handleTrackClick(refId)}
           />
         )}
@@ -130,20 +147,29 @@ export default function App() {
         {activeTab === 'tracker' && (
           <StatusTracker
             initialQuery={trackerQuery}
-            onNavigateToApply={() => handleNavigate('apply')}
+            onNavigateToApply={() => handleApplyClick()}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
-            onNavigateToAdmin={() => handleNavigate('admin')}
+            onNavigateToAdmin={() => setActiveTab('admin')}
           />
         )}
 
+        {/* 7. CONTACT SECTION */}
+        {activeTab === 'contact' && (
+          <ContactSection
+            contactInfo={cmsData.contactInfo}
+          />
+        )}
+
+        {/* 8. ADMIN DASHBOARD & CMS */}
         {activeTab === 'admin' && (
-          <AdminPortal
+          <AdminCmsDashboard
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            onNavigateToWebsite={handleTabChange}
           />
         )}
       </main>
 
-      {/* Unified Login Modal */}
+      {/* Unified Login Modal with Auto-Routing */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -151,7 +177,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      <Footer onNavigate={handleNavigate} />
+      <Footer onNavigate={setActiveTab} />
     </div>
   );
 }
