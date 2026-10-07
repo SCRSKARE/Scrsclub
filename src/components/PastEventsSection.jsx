@@ -7,10 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Search,
-  Sparkles,
-  SlidersHorizontal,
-  Award
+  Search
 } from 'lucide-react';
 import EventDetailModal from './EventDetailModal';
 

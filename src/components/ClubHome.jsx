@@ -2,18 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   Calendar,
-  Users,
   Briefcase,
   ArrowRight,
   Trophy,
-  Award,
   BookOpen,
   Code,
-  ShieldCheck,
-  CheckCircle2,
-  ChevronRight,
-  Building,
-  Target,
   ExternalLink,
   User
 } from 'lucide-react';

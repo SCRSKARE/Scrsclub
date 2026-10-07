@@ -11,9 +11,6 @@ import {
   ChevronRight,
   Calendar,
   Users,
-  Compass,
-  Mail,
-  FileText,
   Lock
 } from 'lucide-react';
 

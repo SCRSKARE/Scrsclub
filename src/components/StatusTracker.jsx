@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search,
   CheckCircle2,
-  Calendar,
-  MapPin,
-  User,
-  Shield,
   AlertCircle,
   LogIn,
   LogOut,
@@ -39,30 +35,7 @@ export default function StatusTracker({ initialQuery = '', onNavigateToApply, on
   const [manualSearched, setManualSearched] = useState(false);
   const [isManualLoading, setIsManualLoading] = useState(false);
 
-  useEffect(() => {
-    const unsub = subscribeToAuth((user) => {
-      setCurrentUser(user);
-    });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    if (currentUser && currentUser.email) {
-      loadUserData(currentUser.email);
-    } else {
-      setUserApplications([]);
-      setUserEventPasses([]);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (initialQuery) {
-      setQueryInput(initialQuery);
-      handleManualSearch(initialQuery);
-    }
-  }, [initialQuery]);
-
-  const loadUserData = async (email) => {
+  const loadUserData = useCallback(async (email) => {
     setIsLoadingUserApps(true);
     try {
       const apps = await getApplicationsForEmail(email);
@@ -74,9 +47,9 @@ export default function StatusTracker({ initialQuery = '', onNavigateToApply, on
     } finally {
       setIsLoadingUserApps(false);
     }
-  };
+  }, []);
 
-  const handleManualSearch = async (valToSearch) => {
+  const handleManualSearch = useCallback(async (valToSearch) => {
     const q = (valToSearch || queryInput).trim();
     if (!q) return;
 
@@ -91,7 +64,30 @@ export default function StatusTracker({ initialQuery = '', onNavigateToApply, on
     } finally {
       setIsManualLoading(false);
     }
-  };
+  }, [queryInput]);
+
+  useEffect(() => {
+    const unsub = subscribeToAuth((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (currentUser && currentUser.email) {
+      loadUserData(currentUser.email);
+    } else {
+      setUserApplications([]);
+      setUserEventPasses([]);
+    }
+  }, [currentUser, loadUserData]);
+
+  useEffect(() => {
+    if (initialQuery) {
+      setQueryInput(initialQuery);
+      handleManualSearch(initialQuery);
+    }
+  }, [initialQuery, handleManualSearch]);
 
   const handlePrintPass = (app) => {
     const printWindow = window.open('', '_blank', 'width=800,height=650');

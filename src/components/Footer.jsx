@@ -1,5 +1,7 @@
 import React from 'react';
-import { Sparkles, MessageSquare, Mail, MapPin, Globe, Share2 } from 'lucide-react';
+import { Sparkles, MessageSquare, Mail, MapPin, Globe, Share2, Phone } from 'lucide-react';
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 export default function Footer({ onNavigate }) {
   return (
@@ -173,7 +175,7 @@ export default function Footer({ onNavigate }) {
           }}
         >
           <div>
-            © {new Date().getFullYear()} SCRS (Student Community & Research Society). Official Student Chapter at KL University. All rights reserved.
+            © {CURRENT_YEAR} SCRS (Student Community & Research Society). Official Student Chapter at KL University. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '1.25rem' }}>
             <span>Annual Recruitment Drive 2026-27</span>

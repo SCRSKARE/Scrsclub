@@ -4,13 +4,11 @@ import {
   Phone,
   MapPin,
   Send,
-  Sparkles,
   MessageSquare,
   Globe,
   Share2,
   CheckCircle,
   Clock,
-  HelpCircle,
   ChevronDown
 } from 'lucide-react';
 

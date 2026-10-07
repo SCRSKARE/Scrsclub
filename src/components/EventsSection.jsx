@@ -2,46 +2,41 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   MapPin,
-  Clock,
-  Award,
-  Users,
   CheckCircle,
   XCircle,
   ExternalLink,
   Sparkles,
   Ticket,
-  Trophy,
-  Tag
+  Trophy
 } from 'lucide-react';
 import {
   getUpcomingEvents,
   getPastEvents,
   registerForEvent,
-  getRegistrationsForEmail,
   subscribeToUpcomingEvents,
   subscribeToPastEvents
 } from '../services/db';
 import { getCurrentUser } from '../services/auth';
 import EventImageSlider from './EventImageSlider';
 
-export default function EventsSection({ onOpenLoginModal, onNavigateToTracker }) {
+export default function EventsSection({ _onOpenLoginModal, onNavigateToTracker }) {
   const [activeSubTab, setActiveSubTab] = useState('upcoming'); // 'upcoming' | 'past'
   const [upcomingEvents, setUpcomingEvents] = useState(getUpcomingEvents());
   const [pastEvents, setPastEvents] = useState(getPastEvents());
 
+  const currentUser = getCurrentUser();
+
   // Registration modal
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [regForm, setRegForm] = useState({
-    fullName: '',
-    email: '',
+  const [regForm, setRegForm] = useState(() => ({
+    fullName: currentUser?.displayName || '',
+    email: currentUser?.email || '',
     rollNumber: '',
     branch: 'Computer Science & Engineering',
     year: '2nd Year',
     phone: ''
-  });
+  }));
   const [regSuccess, setRegSuccess] = useState(null);
-
-  const currentUser = getCurrentUser();
 
   useEffect(() => {
     const unsubEvents = subscribeToUpcomingEvents((events) => setUpcomingEvents(events));
@@ -51,16 +46,6 @@ export default function EventsSection({ onOpenLoginModal, onNavigateToTracker })
       unsubEvents();
       unsubPast();
     };
-  }, []);
-
-  useEffect(() => {
-    if (currentUser) {
-      setRegForm(prev => ({
-        ...prev,
-        fullName: currentUser.displayName || '',
-        email: currentUser.email || ''
-      }));
-    }
   }, []);
 
   const handleRegisterSubmit = (e) => {

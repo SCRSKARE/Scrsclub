@@ -6,14 +6,10 @@ import TimelineAndFaq from './TimelineAndFaq';
 import ApplicationForm from './ApplicationForm';
 import StatusTracker from './StatusTracker';
 import {
-  Shield,
   Layers,
   FileText,
   Search,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Lock
+  Sparkles
 } from 'lucide-react';
 
 export default function HiringSection({

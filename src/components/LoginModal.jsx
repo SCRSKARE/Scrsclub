@@ -13,8 +13,6 @@ import {
 import { signInWithGoogleKlu, signInWithOrgEmailOnly, signInWithPasscode } from '../services/auth';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
-  if (!isOpen) return null;
-
   // Active Login Mode: 'student' | 'admin'
   const [loginMode, setLoginMode] = useState('student');
   const [authError, setAuthError] = useState('');
@@ -23,6 +21,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   // Inputs
   const [orgEmail, setOrgEmail] = useState('');
   const [passcode, setPasscode] = useState('');
+
+  if (!isOpen) return null;
 
   // 1. Google Sign-In
   const handleGoogleLogin = async () => {

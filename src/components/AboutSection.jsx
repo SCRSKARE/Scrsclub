@@ -14,7 +14,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function AboutSection({ aboutData, onExploreEvents, onJoinClick }) {
+export default function AboutSection({ aboutData, onExploreEvents, _onJoinClick }) {
   const faculty = aboutData?.facultyAdvisor || {};
   const milestones = aboutData?.milestones || [];
 

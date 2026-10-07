@@ -5,7 +5,6 @@ import {
   Unlock,
   Home,
   Calendar,
-  Clock,
   Users,
   Trophy,
   FileText,
@@ -15,19 +14,12 @@ import {
   ArrowUp,
   ArrowDown,
   Upload,
-  Image as ImageIcon,
   CheckCircle,
-  AlertTriangle,
   RotateCcw,
-  ExternalLink,
-  ChevronRight,
   Sparkles,
-  HelpCircle,
   Eye,
-  LogOut,
-  Mail,
-  Phone,
-  MapPin
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 
 import {
@@ -138,7 +130,7 @@ export default function AdminCmsDashboard({ onOpenLoginModal, onNavigateToWebsit
   const [contactForm, setContactForm] = useState(cmsData.contactInfo);
 
   // Image upload loading indicator
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [_uploadingImage, setUploadingImage] = useState(false);
 
   // Auth subscriber
   useEffect(() => {
