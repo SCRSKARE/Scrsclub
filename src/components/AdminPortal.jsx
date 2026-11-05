@@ -26,7 +26,9 @@ import {
   Server,
   GraduationCap,
   Sparkles,
-  User
+  User,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import {
   subscribeToApplications,
@@ -47,6 +49,7 @@ import {
   updateTeamMember,
   deleteTeamMember,
   subscribeToTeamMembers,
+  sortTeamMembers,
   seedInitialDataToCloud,
   isFacultyMember
 } from '../services/db';
@@ -506,6 +509,29 @@ export default function AdminPortal({ onOpenLoginModal }) {
       const updated = await deleteTeamMember(id);
       setTeamMembers(updated);
     }
+  };
+
+  const handleMoveTeamMember = async (memberId, direction) => {
+    const orderedMembers = sortTeamMembers(teamMembers);
+    const index = orderedMembers.findIndex(member => member.id === memberId);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= orderedMembers.length) return;
+
+    const currentMember = orderedMembers[index];
+    const targetMember = orderedMembers[targetIndex];
+    const currentOrder = Number(currentMember.order) || index + 1;
+    const targetOrder = Number(targetMember.order) || targetIndex + 1;
+
+    await Promise.all([
+      updateTeamMember(currentMember.id, { order: targetOrder }),
+      updateTeamMember(targetMember.id, { order: currentOrder })
+    ]);
+
+    setTeamMembers(sortTeamMembers(orderedMembers.map(member => {
+      if (member.id === currentMember.id) return { ...member, order: targetOrder };
+      if (member.id === targetMember.id) return { ...member, order: currentOrder };
+      return member;
+    })));
   };
 
   // CSV EXPORT
@@ -1380,7 +1406,7 @@ export default function AdminPortal({ onOpenLoginModal }) {
       {activeAdminTab === 'team' && (() => {
         const adminFacultyCount = teamMembers.filter(isFacultyMember).length;
         const adminClubCount = teamMembers.filter(m => !isFacultyMember(m)).length;
-        const displayTeam = teamMembers.filter(m => {
+        const displayTeam = sortTeamMembers(teamMembers).filter(m => {
           if (adminTeamFilter === 'FACULTY') return isFacultyMember(m);
           if (adminTeamFilter === 'CLUB') return !isFacultyMember(m);
           return true;
@@ -1392,7 +1418,7 @@ export default function AdminPortal({ onOpenLoginModal }) {
               <div>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Manage Chapter Leadership</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0.2rem 0 0' }}>
-                  Manage faculty advisors and student chapter coordinators directly in Cloud Firestore.
+                  Manage faculty advisors and student chapter coordinators directly in Cloud Firestore. Use the up/down arrows on each card to set the public display order.
                 </p>
               </div>
               <button className="btn btn-primary btn-sm" onClick={() => setShowAddTeamModal(true)}>
@@ -1472,7 +1498,7 @@ export default function AdminPortal({ onOpenLoginModal }) {
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                {displayTeam.map(m => {
+                {displayTeam.map((m, memberIndex) => {
                   const isFac = isFacultyMember(m);
                   return (
                     <div
@@ -1487,6 +1513,24 @@ export default function AdminPortal({ onOpenLoginModal }) {
                     >
                       {/* Action buttons */}
                       <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', gap: '0.2rem' }}>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--text-muted)', padding: '0.2rem' }}
+                          title="Move coordinator up"
+                          disabled={memberIndex === 0}
+                          onClick={() => handleMoveTeamMember(m.id, -1)}
+                        >
+                          <ArrowUp size={15} />
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--text-muted)', padding: '0.2rem' }}
+                          title="Move coordinator down"
+                          disabled={memberIndex === displayTeam.length - 1}
+                          onClick={() => handleMoveTeamMember(m.id, 1)}
+                        >
+                          <ArrowDown size={15} />
+                        </button>
                         <button
                           className="btn btn-ghost btn-sm"
                           style={{ color: 'var(--primary)', padding: '0.2rem' }}

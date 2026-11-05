@@ -701,7 +701,16 @@ export function saveTeamMembers(team) {
 }
 
 export function getTeamMembers() {
-  return getLocalTeamMembers();
+  return sortTeamMembers(getLocalTeamMembers());
+}
+
+export function sortTeamMembers(members) {
+  return [...members].sort((a, b) => {
+    const orderA = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+    const orderB = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+    if (orderA !== orderB) return orderA - orderB;
+    return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+  });
 }
 
 export async function fetchTeamMembers() {
@@ -710,14 +719,14 @@ export async function fetchTeamMembers() {
     try {
       const colRef = collection(db, COLLECTIONS.TEAM_MEMBERS);
       const snapshot = await getDocs(colRef);
-      const team = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const team = sortTeamMembers(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       saveTeamMembers(team);
       return team;
     } catch (err) {
       console.warn('Firestore fetchTeamMembers notice:', err);
     }
   }
-  return getLocalTeamMembers();
+  return sortTeamMembers(getLocalTeamMembers());
 }
 
 export function subscribeToTeamMembers(callback) {
@@ -726,12 +735,12 @@ export function subscribeToTeamMembers(callback) {
     try {
       const colRef = collection(db, COLLECTIONS.TEAM_MEMBERS);
       return onSnapshot(colRef, (snapshot) => {
-        const team = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const team = sortTeamMembers(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
         saveTeamMembers(team);
         callback(team);
       }, (error) => {
         console.warn('subscribeToTeamMembers notice:', error);
-        callback(getLocalTeamMembers());
+        callback(sortTeamMembers(getLocalTeamMembers()));
       });
     } catch (e) {
       console.warn('Failed to attach team members listener:', e);
@@ -742,16 +751,22 @@ export function subscribeToTeamMembers(callback) {
 }
 
 export async function addTeamMember(memberData) {
-  const current = getLocalTeamMembers();
+  const current = sortTeamMembers(getLocalTeamMembers()).map((member, index) => ({
+    ...member,
+    order: Number.isFinite(Number(member.order)) ? Number(member.order) : index + 1
+  }));
   const memberId = memberData.id || 'team-' + Date.now();
   const newMember = {
     ...memberData,
     id: memberId,
+    order: Number.isFinite(Number(memberData.order))
+      ? Number(memberData.order)
+      : current.length + 1,
     createdAt: new Date().toISOString()
   };
 
   current.push(newMember);
-  saveTeamMembers(current);
+  saveTeamMembers(sortTeamMembers(current));
 
   const db = getDb();
   if (db) {
@@ -771,7 +786,7 @@ export async function addTeamMember(memberData) {
 export async function updateTeamMember(memberId, updates) {
   const current = getLocalTeamMembers();
   const updated = current.map(item => item.id === memberId ? { ...item, ...updates } : item);
-  saveTeamMembers(updated);
+  saveTeamMembers(sortTeamMembers(updated));
 
   const db = getDb();
   if (db) {
@@ -860,6 +875,3 @@ export async function ensureInitialDataInFirestore() {
   // Permanently disabled: Never re-seeds sample items to Firestore so deleted items stay deleted.
   return;
 }
-
-
-
