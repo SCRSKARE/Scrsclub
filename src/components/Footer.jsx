@@ -146,15 +146,11 @@ export default function Footer({ onNavigate }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
                 <MapPin size={16} color="#06b6d4" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>Room 304, Student Activity Center (SAC), KL University, Vaddeswaram, AP 522502</span>
+                <span>8TH BLOCK,KALASALINGAM UNIVERSITY,TN-626126</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Mail size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
                 <span>scrs@klu.ac.in</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Phone size={16} color="#10b981" style={{ flexShrink: 0 }} />
-                <span>+91 98765 43210</span>
               </div>
             </div>
           </div>
