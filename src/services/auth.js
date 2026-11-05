@@ -14,7 +14,6 @@ import {
 const SESSION_KEY = 'scrs_klu_auth_user_v2';
 
 const STORAGE_KEY_ADMIN_LIST = 'scrs_admin_emails_v2';
-const STORAGE_KEY_ADMIN_PASSCODE = 'scrs_admin_passcode_v2';
 const STORAGE_KEY_SETTINGS = 'scrs_portal_settings_v2';
 
 export const DEFAULT_ADMIN_EMAILS = [
@@ -37,13 +36,18 @@ export function getAdminEmails() {
 }
 
 export function saveAdminEmails(emails) {
-  localStorage.setItem(STORAGE_KEY_ADMIN_LIST, JSON.stringify(emails));
+  const normalizedEmails = [...new Set(emails.map(email => email.trim().toLowerCase()))];
+  localStorage.setItem(STORAGE_KEY_ADMIN_LIST, JSON.stringify(normalizedEmails));
 
   const db = getDb();
   if (db) {
-    setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'admins'), { emails })
-      .catch(err => console.warn('Firestore saveAdminEmails notice:', err));
+    return setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'admins'), { emails: normalizedEmails })
+      .catch(err => {
+        console.warn('Firestore saveAdminEmails notice:', err);
+        throw err;
+      });
   }
+  return Promise.resolve();
 }
 
 export function addAdminEmail(email) {
@@ -65,20 +69,6 @@ export function removeAdminEmail(email) {
   return updated;
 }
 
-export function getAdminPasscode() {
-  return localStorage.getItem(STORAGE_KEY_ADMIN_PASSCODE) || 'scrs2026';
-}
-
-export function saveAdminPasscode(newPin) {
-  localStorage.setItem(STORAGE_KEY_ADMIN_PASSCODE, newPin.trim());
-
-  const db = getDb();
-  if (db) {
-    setDoc(doc(db, COLLECTIONS.PORTAL_SETTINGS, 'security'), { passcode: newPin.trim() })
-      .catch(err => console.warn('Firestore saveAdminPasscode notice:', err));
-  }
-}
-
 export function getPortalSettings() {
   const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
   const defaults = {
@@ -86,10 +76,34 @@ export function getPortalSettings() {
     recruitmentYear: '2026-27',
     allowMultipleApplications: false,
     announcementMessage: 'Annual Coordinator Recruitment 2026-27 is LIVE',
-    passcodeRequired: true
   };
   if (!stored) return defaults;
   try { return { ...defaults, ...JSON.parse(stored) }; } catch { return defaults; }
+}
+
+export function subscribeToAdminEmails(callback) {
+  const db = getDb();
+  if (!db) {
+    callback(getAdminEmails());
+    return () => {};
+  }
+
+  const adminsRef = doc(db, COLLECTIONS.PORTAL_SETTINGS, 'admins');
+  return onSnapshot(adminsRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback(getAdminEmails());
+      return;
+    }
+
+    const emails = Array.isArray(snapshot.data().emails)
+      ? snapshot.data().emails.map(email => String(email).trim().toLowerCase()).filter(Boolean)
+      : [];
+    localStorage.setItem(STORAGE_KEY_ADMIN_LIST, JSON.stringify(emails));
+    callback(emails);
+  }, (error) => {
+    console.warn('subscribeToAdminEmails notice:', error);
+    callback(getAdminEmails());
+  });
 }
 
 export function savePortalSettings(settings) {
@@ -268,51 +282,13 @@ export async function signInWithGoogleKlu() {
       );
     }
     if (err.code === 'auth/popup-blocked') {
-      throw new Error('Sign-in popup was blocked by browser. Please allow popups or enter your @klu.ac.in email below.');
+      throw new Error('Sign-in popup was blocked by the browser. Please allow popups and try again.');
     }
     if (err.code === 'auth/popup-closed-by-user') {
       throw new Error('Google sign-in popup was closed before completing authentication.');
     }
     throw err;
   }
-}
-
-// Direct sign-in using official organization email without password
-export async function signInWithOrgEmailOnly(email) {
-  const cleanEmail = email.trim().toLowerCase();
-
-  if (!isKluEmail(cleanEmail)) {
-    throw new Error('Restricted: Only official university emails ending with @klu.ac.in are allowed.');
-  }
-
-  const role = getUserRole(cleanEmail);
-  const user = {
-    uid: 'klu-' + btoa(cleanEmail).slice(0, 12),
-    email: cleanEmail,
-    displayName: cleanEmail.split('@')[0].toUpperCase(),
-    role: role,
-    isFirebase: Boolean(getFirebaseAuth())
-  };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-  return user;
-}
-
-// Sign in with coordinator passcode (admin)
-export async function signInWithPasscode(passcode) {
-  const clean = (passcode || '').trim();
-  if (clean === 'scrs2026' || clean === 'admin') {
-    const adminUser = {
-      uid: 'admin-passcode-user',
-      email: 'admin@klu.ac.in',
-      displayName: 'SCRS Administrator',
-      role: 'admin',
-      isPasscodeAuth: true
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(adminUser));
-    return adminUser;
-  }
-  throw new Error('Invalid passcode. Use "scrs2026" or "admin".');
 }
 
 // Sign out

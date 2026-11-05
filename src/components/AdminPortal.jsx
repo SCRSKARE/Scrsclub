@@ -7,7 +7,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Unlock,
   LogIn,
   Award,
   RotateCcw,
@@ -21,9 +20,7 @@ import {
   Settings,
   UserPlus,
   Check,
-  Lock,
   Sliders,
-  Key,
   Database,
   RefreshCw,
   Server,
@@ -59,8 +56,7 @@ import {
   getAdminEmails,
   addAdminEmail,
   removeAdminEmail,
-  getAdminPasscode,
-  saveAdminPasscode,
+  subscribeToAdminEmails,
   getPortalSettings,
   savePortalSettings,
   subscribeToPortalSettings
@@ -71,9 +67,6 @@ import PhotoInput from './PhotoInput';
 
 export default function AdminPortal({ onOpenLoginModal }) {
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [pinUnlocked, setPinUnlocked] = useState(false);
 
   // Active Admin Section
   const [activeAdminTab, setActiveAdminTab] = useState('applications'); // 'applications' | 'events' | 'past' | 'team' | 'settings'
@@ -81,8 +74,6 @@ export default function AdminPortal({ onOpenLoginModal }) {
   // Multi-Admin & Settings state
   const [adminEmailsList, setAdminEmailsList] = useState(getAdminEmails());
   const [newAdminEmailInput, setNewAdminEmailInput] = useState('');
-  const [adminPasscodeInput, setAdminPasscodeInput] = useState(getAdminPasscode());
-  const [passcodeSavedMsg, setPasscodeSavedMsg] = useState('');
   const [portalSettings, setPortalSettingsState] = useState(getPortalSettings());
   const [settingsSavedMsg, setSettingsSavedMsg] = useState('');
 
@@ -174,16 +165,22 @@ export default function AdminPortal({ onOpenLoginModal }) {
     const unsub = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
-    return () => unsub();
+    const unsubAdmins = subscribeToAdminEmails((emails) => {
+      setAdminEmailsList(emails);
+    });
+    return () => {
+      unsub();
+      unsubAdmins();
+    };
   }, []);
 
-  const isAuthorized = (currentUser && currentUser.role === 'admin') || pinUnlocked;
+  const isAuthorized = currentUser?.role === 'admin';
 
   useEffect(() => {
     testDatabaseConnection().then(res => {
       setDbStatus(res);
     });
-  }, []);
+  }, [currentUser?.uid]);
 
   useEffect(() => {
     if (isAuthorized) {
@@ -215,17 +212,6 @@ export default function AdminPortal({ onOpenLoginModal }) {
       };
     }
   }, [isAuthorized]);
-
-  const handlePinLogin = (e) => {
-    e.preventDefault();
-    const currentPass = getAdminPasscode();
-    if (pinInput.trim() === currentPass || pinInput.trim() === 'admin' || pinInput.trim() === 'scrs2026') {
-      setPinUnlocked(true);
-      setPinError('');
-    } else {
-      setPinError('Invalid coordinator passcode.');
-    }
-  };
 
   // APPLICATION HANDLERS
   const handleStatusChange = async (appId, newStatus) => {
@@ -641,43 +627,6 @@ export default function AdminPortal({ onOpenLoginModal }) {
               <span>Sign In with Admin Account</span>
             </button>
 
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBlock: '1.25rem',
-              color: 'var(--text-dim)',
-              fontSize: '0.78rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em'
-            }}>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
-              <span style={{ paddingInline: '0.75rem' }}>or enter coordinator passcode</span>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
-            </div>
-
-            <form onSubmit={handlePinLogin}>
-              <div className="form-group" style={{ textAlign: 'left', marginBottom: '1rem' }}>
-                <input
-                  id="pin"
-                  type="password"
-                  className="form-input"
-                  placeholder="Enter passcode..."
-                  value={pinInput}
-                  onChange={(e) => setPinInput(e.target.value)}
-                />
-              </div>
-
-              {pinError && (
-                <div style={{ color: '#fb7185', fontSize: '0.82rem', marginBottom: '1rem', textAlign: 'left' }}>
-                  {pinError}
-                </div>
-              )}
-
-              <button type="submit" className="btn btn-secondary" style={{ width: '100%' }}>
-                <Unlock size={16} />
-                <span>Unlock Dashboard</span>
-              </button>
-            </form>
           </div>
         </div>
       </div>
@@ -714,7 +663,13 @@ export default function AdminPortal({ onOpenLoginModal }) {
             color: dbStatus?.connected ? '#34d399' : '#facc15'
           }}>
             <Database size={13} />
-            <span>{dbStatus?.connected ? `Firestore: ${dbStatus.projectId}` : 'Local Mode'}</span>
+            <span>{dbStatus?.connected
+              ? `Firestore: ${dbStatus.projectId}`
+              : dbStatus?.mode === 'authentication_required'
+                ? 'Sign in required'
+                : dbStatus?.mode === 'permission_restricted'
+                  ? 'Firestore permissions restricted'
+                  : 'Local Mode'}</span>
           </div>
           <button className="btn btn-secondary btn-sm" onClick={handleExportCsv}>
             <Download size={15} />
@@ -1697,50 +1652,7 @@ export default function AdminPortal({ onOpenLoginModal }) {
             </div>
           </div>
 
-          {/* Section 2: Security & Passcode */}
-          <div className="glass-card" style={{ padding: '1.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.5rem' }}>
-              <Lock size={20} color="#fbbf24" />
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 800 }}>Admin Unlock Passcode</h3>
-            </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
-              Update the passcode used for quick coordinator passcode unlock on the Admin Portal screen.
-            </p>
-
-            {passcodeSavedMsg && (
-              <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#34d399', padding: '0.65rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Check size={16} />
-                <span>{passcodeSavedMsg}</span>
-              </div>
-            )}
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                saveAdminPasscode(adminPasscodeInput);
-                setPasscodeSavedMsg('Admin Passcode updated successfully!');
-                setTimeout(() => setPasscodeSavedMsg(''), 3000);
-              }}
-              style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}
-            >
-              <div className="search-input-wrap" style={{ flex: 1, minWidth: '220px' }}>
-                <Key size={16} />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="New Admin Passcode..."
-                  value={adminPasscodeInput}
-                  onChange={(e) => setAdminPasscodeInput(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-secondary" style={{ fontWeight: 700 }}>
-                <span>Save New Passcode</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Section 3: Recruitment Drive Controls */}
+          {/* Recruitment Drive Controls */}
           <div className="glass-card" style={{ padding: '1.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.5rem' }}>
               <Sliders size={20} color="#a855f7" />
@@ -1835,7 +1747,13 @@ export default function AdminPortal({ onOpenLoginModal }) {
                     boxShadow: dbStatus.connected ? '0 0 8px #10b981' : '0 0 8px #f59e0b'
                   }} />
                   <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                    {dbStatus.connected ? 'Cloud Database Connected' : 'Local Fallback Mode Active'}
+                    {dbStatus.connected
+                      ? 'Cloud Database Connected'
+                      : dbStatus.mode === 'authentication_required'
+                        ? 'Google sign-in required before testing'
+                        : dbStatus.mode === 'permission_restricted'
+                          ? 'Firestore reached, but access is restricted'
+                          : 'Local Fallback Mode Active'}
                   </span>
                 </div>
                 <button

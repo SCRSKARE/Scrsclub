@@ -20,8 +20,6 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth';
@@ -104,6 +102,16 @@ export async function testDatabaseConnection() {
     };
   }
 
+  const auth = getFirebaseAuth();
+  if (!auth?.currentUser) {
+    return {
+      connected: false,
+      mode: 'authentication_required',
+      projectId: firebaseConfig.projectId,
+      message: 'Sign in with Google before testing the Firestore connection.'
+    };
+  }
+
   try {
     const testRef = collection(db, COLLECTIONS.APPLICATIONS);
     const q = query(testRef, limit(1));
@@ -146,8 +154,6 @@ export {
   serverTimestamp,
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 };

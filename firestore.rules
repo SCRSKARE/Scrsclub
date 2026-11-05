@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Keep one initial administrator available so the allowlist can be created
+    // in Firestore. Change this address before deploying if required.
+    function isBootstrapAdmin() {
+      return signedIn()
+        && request.auth.token.email == '99230041018@klu.ac.in';
+    }
+
+    function isAdmin() {
+      return isBootstrapAdmin()
+        || (
+          signedIn()
+          && exists(/databases/$(database)/documents/portal_settings/admins)
+          && request.auth.token.email in
+             get(/databases/$(database)/documents/portal_settings/admins).data.emails
+        );
+    }
+
+    match /users/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // The site displays these collections publicly. Only administrators may
+    // create, edit, or delete their contents.
+    match /upcoming_events/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /past_events/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /team_members/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Recruitment applications may be submitted before login. Applicant
+    // reads are limited to documents matching the signed-in Google account.
+    match /applications/{documentId} {
+      allow create: if true;
+      allow read: if isAdmin()
+                  || (signedIn() && resource.data.email == request.auth.token.email);
+      allow update, delete: if isAdmin();
+    }
+
+    match /event_registrations/{documentId} {
+      allow create: if true;
+      allow read: if isAdmin()
+                  || (signedIn() && resource.data.email == request.auth.token.email);
+      allow update, delete: if isAdmin();
+    }
+
+    match /portal_settings/admins {
+      // The client must read this document to calculate the current user's
+      // admin role and to receive real-time allowlist updates.
+      allow read: if signedIn();
+      allow create: if isBootstrapAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /portal_settings/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

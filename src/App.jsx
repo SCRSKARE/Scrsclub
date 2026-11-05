@@ -7,7 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import { initFirebase } from './services/firebase';
 import { purgeLegacySampleData } from './services/db';
-import { getCurrentUser, subscribeToAuth, signOutParticipant } from './services/auth';
+import { getCurrentUser, subscribeToAuth, subscribeToAdminEmails, signOutParticipant } from './services/auth';
 
 // Code-split heavy views for fast initial load
 const EventsSection = lazy(() => import('./components/EventsSection'));
@@ -85,10 +85,14 @@ export default function App() {
     const unsubAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
+    const unsubAdmins = subscribeToAdminEmails(() => {
+      setCurrentUser(getCurrentUser());
+    });
 
     return () => {
       window.removeEventListener('hashchange', syncTabFromHash);
       unsubAuth();
+      unsubAdmins();
     };
   }, []);
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
   Lock,
-  Unlock,
   Home,
   Calendar,
   Users,
@@ -51,9 +50,6 @@ import { getCurrentUser, subscribeToAuth, signOutParticipant } from '../services
 export default function AdminCmsDashboard({ onOpenLoginModal, onNavigateToWebsite }) {
   // Auth state
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [pinUnlocked, setPinUnlocked] = useState(false);
 
   // Active Admin Tab: 'overview' | 'homepage' | 'past-events' | 'upcoming-events' | 'team' | 'about-contact' | 'recruitment'
   const [adminTab, setAdminTab] = useState('overview');
@@ -151,22 +147,11 @@ export default function AdminCmsDashboard({ onOpenLoginModal, onNavigateToWebsit
     return () => unsub();
   }, []);
 
-  const isAuthorized = (currentUser && currentUser.role === 'admin') || pinUnlocked;
+  const isAuthorized = currentUser?.role === 'admin';
 
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3500);
-  };
-
-  const handlePinSubmit = (e) => {
-    e.preventDefault();
-    if (pinInput.trim() === 'scrs2026' || pinInput.trim() === 'admin') {
-      setPinUnlocked(true);
-      setPinError('');
-      showToast('Welcome, Administrator!');
-    } else {
-      setPinError('Invalid passcode. Use "scrs2026" or "admin".');
-    }
   };
 
   // Generic image upload handler (reads file, compresses, sets form state)
@@ -521,44 +506,6 @@ export default function AdminCmsDashboard({ onOpenLoginModal, onNavigateToWebsit
             Protected administrator access. Manage events, gallery photos, winners, team members, and recruitment applications.
           </p>
 
-          {/* Passcode Login Form */}
-          <form onSubmit={handlePinSubmit} style={{ marginBottom: '1.75rem' }}>
-            <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                Admin Master Passcode
-              </label>
-              <input
-                type="password"
-                placeholder="Enter passcode (default: scrs2026 or admin)"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                className="form-control"
-                autoFocus
-              />
-              {pinError && (
-                <div style={{ color: '#f87171', fontSize: '0.8rem', marginTop: '0.4rem' }}>
-                  {pinError}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-            >
-              <Unlock size={16} />
-              <span>Unlock Admin Dashboard</span>
-            </button>
-          </form>
-
-          <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-            <div style={{ height: '1px', background: 'var(--border-subtle)' }} />
-            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--bg-secondary)', padding: '0 10px', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              OR AUTHENTICATE WITH
-            </span>
-          </div>
-
           <button
             type="button"
             onClick={onOpenLoginModal}
@@ -670,7 +617,6 @@ export default function AdminCmsDashboard({ onOpenLoginModal, onNavigateToWebsit
 
             <button
               onClick={() => {
-                setPinUnlocked(false);
                 signOutParticipant();
               }}
               className="btn btn-secondary btn-sm"
